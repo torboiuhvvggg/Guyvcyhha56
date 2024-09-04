@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تترس بأشكال هندسية</title>
+    <style>
+        canvas {
+            background-color: #f0f0f0;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const GRID_SIZE = 40;
+        const shapes = [
+            { color: 'red', shape: 'square' },
+            { color: 'green', shape: 'triangle' },
+            { color: 'blue', shape: 'circle' }
+        ];
+
+        class Shape {
+            constructor(x, y, shapeType) {
+                this.x = x;
+                this.y = y;
+                this.shapeType = shapeType.shape;
+                this.color = shapeType.color;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                if (this.shapeType === 'square') {
+                    ctx.fillRect(this.x, this.y, GRID_SIZE, GRID_SIZE);
+                } else if (this.shapeType === 'triangle') {
+                    ctx.moveTo(this.x + GRID_SIZE / 2, this.y);
+                    ctx.lineTo(this.x, this.y + GRID_SIZE);
+                    ctx.lineTo(this.x + GRID_SIZE, this.y + GRID_SIZE);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.shapeType === 'circle') {
+                    ctx.arc(this.x + GRID_SIZE / 2, this.y + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            moveDown() {
+                this.y += GRID_SIZE;
+            }
+        }
+
+        let currentShape = new Shape(canvas.width / 2 - GRID_SIZE / 2, 0, getRandomShape());
+        let gameOver = false;
+
+        function getRandomShape() {
+            return shapes[Math.floor(Math.random() * shapes.length)];
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (currentShape.y + GRID_SIZE < canvas.height) {
+                currentShape.moveDown();
+            } else {
+                currentShape = new Shape(canvas.width / 2 - GRID_SIZE / 2, 0, getRandomShape());
+            }
+
+            currentShape.draw();
+
+            if (!gameOver) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft' && currentShape.x > 0) {
+                currentShape.x -= GRID_SIZE;
+            } else if (event.key === 'ArrowRight' && currentShape.x + GRID_SIZE < canvas.width) {
+                currentShape.x += GRID_SIZE;
+            } else if (event.key === 'ArrowDown') {
+                currentShape.moveDown();
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
